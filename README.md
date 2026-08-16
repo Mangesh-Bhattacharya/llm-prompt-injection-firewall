@@ -1,5 +1,9 @@
 # Prompt Firewall 🛡️
 
+[![CI](https://github.com/Mangesh-Bhattacharya/llm-prompt-injection-firewall/actions/workflows/ci.yml/badge.svg)](https://github.com/Mangesh-Bhattacharya/llm-prompt-injection-firewall/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](pyproject.toml)
+
 A lightweight, dependency-light library and service for detecting **prompt injection** attempts — the #1 risk in [OWASP's LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — before they reach an LLM, or before an LLM's output reaches a downstream tool/action.
 
 Runs fully offline: no embedding model download, no external API call. Analysis takes single-digit milliseconds.
