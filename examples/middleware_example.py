@@ -29,7 +29,10 @@ def guarded_llm_call(user_input: str, system_context: str = "") -> str:
         )
 
     if result.verdict == Verdict.FLAG:
-        print(f"[promptfirewall] FLAGGED (score={result.risk_score}) — logging for review, allowing through.")
+        print(
+            f"[promptfirewall] FLAGGED (score={result.risk_score})"
+            " — logging for review, allowing through."
+        )
 
     return call_llm(f"{system_context}\n\n{user_input}")
 

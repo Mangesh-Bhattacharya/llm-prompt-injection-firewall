@@ -26,7 +26,10 @@ _RESET = "\033[0m"
 
 def _print_human(result) -> None:
     color = _VERDICT_COLOR.get(result.verdict, "")
-    print(f"{color}Verdict: {result.verdict.value.upper()}{_RESET}  (risk score: {result.risk_score}/100)")
+    print(
+        f"{color}Verdict: {result.verdict.value.upper()}{_RESET}"
+        f"  (risk score: {result.risk_score}/100)"
+    )
 
     if result.matched_patterns:
         print("\nMatched patterns:")

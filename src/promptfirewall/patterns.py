@@ -23,7 +23,14 @@ class InjectionPattern:
     description: str
 
 
-def _p(name: str, category: str, pattern: str, weight: int, description: str, flags=re.IGNORECASE) -> InjectionPattern:
+def _p(
+    name: str,
+    category: str,
+    pattern: str,
+    weight: int,
+    description: str,
+    flags=re.IGNORECASE,
+) -> InjectionPattern:
     return InjectionPattern(name, category, re.compile(pattern, flags), weight, description)
 
 
@@ -54,7 +61,9 @@ PATTERNS: list[InjectionPattern] = [
     _p(
         "persona_hijack",
         "role_hijack",
-        r"\b(you are now|act as|pretend (to be|you are)|roleplay as|simulate being)\b[^.\n]{0,60}\b(dan|developer mode|jailbroken|unfiltered|no restrictions|without (any )?limits?|evil|opposite)\b",
+        r"\b(you are now|act as|pretend (to be|you are)|roleplay as|simulate being)\b"
+        r"[^.\n]{0,60}\b(dan|developer mode|jailbroken|unfiltered|no restrictions|"
+        r"without (any )?limits?|evil|opposite)\b",
         40,
         "Attempts to reassign the model's persona to bypass safety behavior.",
     ),
@@ -68,7 +77,8 @@ PATTERNS: list[InjectionPattern] = [
     _p(
         "dual_response",
         "role_hijack",
-        r"\brespond (as|with)\s+(two|2)\b[^.\n]{0,40}\b(one (normal|filtered)|one (jailbroken|unfiltered|uncensored))\b",
+        r"\brespond (as|with)\s+(two|2)\b[^.\n]{0,40}"
+        r"\b(one (normal|filtered)|one (jailbroken|unfiltered|uncensored))\b",
         30,
         "Dual-response jailbreak pattern (normal answer + 'unlocked' answer).",
     ),
@@ -76,7 +86,8 @@ PATTERNS: list[InjectionPattern] = [
     _p(
         "reveal_system_prompt",
         "exfiltration",
-        r"\b(reveal|repeat|print|show|output|leak)\b[^.\n]{0,30}\b(your\s+)?(system prompt|initial prompt|instructions|configuration)\b",
+        r"\b(reveal|repeat|print|show|output|leak)\b[^.\n]{0,30}"
+        r"\b(your\s+)?(system prompt|initial prompt|instructions|configuration)\b",
         35,
         "Attempts to exfiltrate the hidden system prompt or configuration.",
     ),
