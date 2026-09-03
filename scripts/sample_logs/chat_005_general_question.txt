@@ -1,0 +1,2 @@
+What's the difference between a static and dynamic IP address, and which one
+does my home router usually get from the ISP?
