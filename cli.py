@@ -62,8 +62,15 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.file:
-        with open(args.file, "r", encoding="utf-8") as f:
-            text = f.read()
+        try:
+            with open(args.file, "r", encoding="utf-8") as f:
+                text = f.read()
+        except FileNotFoundError:
+            print(f"error: no such file: {args.file}", file=sys.stderr)
+            return 2
+        except UnicodeDecodeError as e:
+            print(f"error: could not read {args.file} as UTF-8 text: {e}", file=sys.stderr)
+            return 2
     elif args.stdin:
         text = sys.stdin.read()
     elif args.text:

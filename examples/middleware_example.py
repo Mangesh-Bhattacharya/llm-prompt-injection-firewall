@@ -6,6 +6,13 @@ This shows the integration pattern, not a specific vendor SDK — swap
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# Allow running this file directly (`python examples/middleware_example.py`)
+# without installing the package or setting PYTHONPATH.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from src.promptfirewall import PromptFirewall, Verdict
 
 firewall = PromptFirewall()

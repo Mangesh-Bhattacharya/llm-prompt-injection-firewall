@@ -1,7 +1,7 @@
 """FastAPI wrapper exposing the firewall as an HTTP service.
 
-Run locally:
-    uvicorn promptfirewall.api:app --reload
+Run locally (from the repository root, so the `src` layout resolves):
+    uvicorn src.promptfirewall.api:app --reload
 
 Then:
     curl -X POST http://localhost:8000/analyze \
