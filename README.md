@@ -1,5 +1,9 @@
 # Prompt Firewall 🛡️
 
+[![CI](https://github.com/Mangesh-Bhattacharya/llm-prompt-injection-firewall/actions/workflows/ci.yml/badge.svg)](https://github.com/Mangesh-Bhattacharya/llm-prompt-injection-firewall/actions/workflows/ci.yml)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+
 A lightweight, dependency-light library and service for detecting **prompt injection** attempts — the #1 risk in [OWASP's LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — before they reach an LLM, or before an LLM's output reaches a downstream tool/action.
 
 Runs fully offline: no embedding model download, no external API call. Analysis takes single-digit milliseconds.
@@ -7,6 +11,8 @@ Runs fully offline: no embedding model download, no external API call. Analysis 
 ## Why This Exists
 
 83% of organizations are deploying AI in production, but most security teams don't yet have staff who understand AI-specific threats like prompt injection, model manipulation, and agent hijacking — [it's the single largest cited cybersecurity skills gap of 2026](https://app.stationx.net/articles/cybersecurity-skills-gap-statistics). Prompt injection isn't a theoretical risk: it's how attackers get a chatbot to leak its system prompt, get an AI coding agent to exfiltrate secrets, or get an autonomous agent to call a "delete" tool it was never supposed to touch.
+
+The same pattern shows up wherever an LLM sits in front of anything sensitive — a banking assistant that can look up account details, a telecom support bot with access to a customer's plan and billing, an internal copilot with tool access to production systems. In each case the model is trusting text it didn't write (user input, a retrieved document, a tool's output) as if it were an instruction, and that trust is exactly what prompt injection abuses.
 
 This project is a practical, inspectable answer to that gap: a firewall you can actually read, test, and reason about — not a black box.
 
@@ -53,7 +59,7 @@ print(result.to_dict())    # full breakdown: matched patterns, heuristics, simil
 
 ### Wrapping an LLM call
 
-See [`examples/middleware_example.py`](examples/middleware_example.py) for the integration pattern — check user input (and, for RAG/agentic apps, retrieved documents and tool output too, since indirect injection is just as real as direct input) before it reaches the model or an action executes.
+See [`examples/middleware_example.py`](examples/middleware_example.py) for the integration pattern — check user input (and, for RAG/agentic apps, retrieved documents and tool output too, since indirect injection is just as real as direct input) before it reaches the model or an action executes. It's a self-contained script (`python examples/middleware_example.py`) if you want to run it directly.
 
 ### CLI
 
@@ -64,6 +70,8 @@ echo "some text" | python cli.py --stdin
 python cli.py --json "some text"                 # machine-readable
 python cli.py --fail-on-block "some text"         # exit 1 on BLOCK — for CI/pre-commit hooks
 ```
+
+A missing or non-UTF-8 `--file` exits with status 2 and a one-line error on stderr, rather than a stack trace.
 
 ### HTTP API
 
@@ -84,18 +92,37 @@ pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
 
-45 tests covering benign-text false-positive avoidance, every pattern category, every heuristic, the similarity detector, verdict threshold configuration, and result serialization. CI runs the suite on Python 3.10–3.12 on every push.
+52 tests covering benign-text false-positive avoidance, every pattern category, every heuristic, the similarity detector, verdict threshold configuration, result serialization, and CLI error handling. CI runs the suite on Python 3.10–3.12 on every push.
+
+`./scripts/check.sh` runs the same install → test → CLI-smoke-test sequence as CI, locally, before you push.
+
+## Evaluation
+
+[`notebooks/evaluation.ipynb`](notebooks/evaluation.ipynb) runs the detector against a 74-prompt labeled set ([`notebooks/data/eval_prompts.csv`](notebooks/data/eval_prompts.csv)) — 40 benign prompts spanning general Q&A, finance/telecom support, and security/ML meta-discussion designed to stress-test false positives, plus 34 injection attempts (the known-corpus examples the similarity detector is fit on, and 10 hand-written paraphrases that don't appear in the corpus, to test generalization).
+
+| Policy | Precision | Recall | F1 |
+|---|---|---|---|
+| Strict — `BLOCK` only | 1.000 | 0.412 | 0.583 |
+| Review-inclusive — `FLAG` or `BLOCK` | 0.935 | 0.853 | 0.892 |
+
+Read as: nothing the strict policy blocks is a false alarm, but it misses over half the paraphrased attacks in the set — which is exactly why `FLAG` is a separate, non-blocking tier rather than something safe to ignore. The notebook walks through the specific false positives and false negatives (with the matched pattern/heuristic/similarity score behind each one) and what they imply for `patterns.py` and `corpus.py`. Reproduce it with:
+
+```bash
+pip install -r requirements-notebook.txt
+jupyter notebook notebooks/evaluation.ipynb
+```
 
 ## Limitations (read before relying on this in production)
 
 - **Not a silver bullet.** No prompt-injection defense is complete — this raises the bar and gives you visibility, it doesn't guarantee zero bypasses. Defense in depth (least-privilege tool access, output validation, human approval for destructive actions) still matters more than any single filter.
 - **English-first.** Patterns and the similarity corpus are English-language; non-English injection attempts will mostly rely on the heuristic layer alone.
-- **TF-IDF, not embeddings.** As noted above, similarity matching is bag-of-words-level, not true semantic understanding.
+- **TF-IDF, not embeddings.** As noted above, similarity matching is bag-of-words-level, not true semantic understanding — see the Evaluation section for what that costs in recall against paraphrased attacks.
 - **Static corpus.** New jailbreak techniques emerge constantly; `patterns.py` and `corpus.py` need to be maintained as the threat landscape evolves — PRs welcome.
 
 ## Roadmap
 
-- [ ] Optional sentence-embedding backend for stronger similarity matching
+- [ ] Optional sentence-embedding backend for stronger similarity matching against paraphrased attacks
+- [ ] Anchor `dan_mode` and similar patterns against imperative vs. descriptive use, to cut false positives on security-discussion text (see [`notebooks/evaluation.ipynb`](notebooks/evaluation.ipynb))
 - [ ] Per-tenant/per-app custom pattern packs
 - [ ] Structured logging sink (JSON lines) for SIEM ingestion
 - [ ] Benchmark against public prompt-injection datasets
