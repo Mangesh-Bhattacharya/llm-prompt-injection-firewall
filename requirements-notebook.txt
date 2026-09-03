@@ -1,0 +1,4 @@
+-r requirements.txt
+jupyter>=1.0,<2.0
+pandas>=2.2,<3.0
+matplotlib>=3.9,<4.0
