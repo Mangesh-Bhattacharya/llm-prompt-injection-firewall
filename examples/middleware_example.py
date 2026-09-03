@@ -6,7 +6,16 @@ This shows the integration pattern, not a specific vendor SDK — swap
 
 from __future__ import annotations
 
-from src.promptfirewall import PromptFirewall, Verdict
+import sys
+from pathlib import Path
+
+# Allow running this file directly (`python examples/middleware_example.py`)
+# without the package being installed. `src.promptfirewall` is only
+# importable from the repo root, which isn't on sys.path when a script is
+# invoked by file path rather than as a module (`python -m examples....`).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from src.promptfirewall import PromptFirewall, Verdict  # noqa: E402
 
 firewall = PromptFirewall()
 
@@ -29,7 +38,10 @@ def guarded_llm_call(user_input: str, system_context: str = "") -> str:
         )
 
     if result.verdict == Verdict.FLAG:
-        print(f"[promptfirewall] FLAGGED (score={result.risk_score}) — logging for review, allowing through.")
+        print(
+            f"[promptfirewall] FLAGGED (score={result.risk_score})"
+            " — logging for review, allowing through."
+        )
 
     return call_llm(f"{system_context}\n\n{user_input}")
 

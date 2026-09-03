@@ -26,7 +26,10 @@ _RESET = "\033[0m"
 
 def _print_human(result) -> None:
     color = _VERDICT_COLOR.get(result.verdict, "")
-    print(f"{color}Verdict: {result.verdict.value.upper()}{_RESET}  (risk score: {result.risk_score}/100)")
+    print(
+        f"{color}Verdict: {result.verdict.value.upper()}{_RESET}"
+        f"  (risk score: {result.risk_score}/100)"
+    )
 
     if result.matched_patterns:
         print("\nMatched patterns:")
@@ -62,8 +65,21 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.file:
-        with open(args.file, "r", encoding="utf-8") as f:
-            text = f.read()
+        try:
+            with open(args.file, "r", encoding="utf-8") as f:
+                text = f.read()
+        except FileNotFoundError:
+            print(f"error: file not found: {args.file}", file=sys.stderr)
+            return 2
+        except IsADirectoryError:
+            print(f"error: '{args.file}' is a directory, not a file", file=sys.stderr)
+            return 2
+        except PermissionError:
+            print(f"error: permission denied reading '{args.file}'", file=sys.stderr)
+            return 2
+        except UnicodeDecodeError:
+            print(f"error: '{args.file}' is not valid UTF-8 text", file=sys.stderr)
+            return 2
     elif args.stdin:
         text = sys.stdin.read()
     elif args.text:

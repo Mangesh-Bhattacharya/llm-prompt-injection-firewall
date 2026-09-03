@@ -1,0 +1,2 @@
+Customers on POP-EAST-04 report 3-5% packet loss since 02:14 UTC. Traceroute
+shows the drop at the second hop past the aggregation router.

@@ -15,7 +15,9 @@ class TestHighEntropyBlob:
         assert signal.name == "high_entropy_blob"
 
     def test_ignores_normal_english_text(self):
-        signal = detect_high_entropy_blob("This is a completely normal sentence about cats and dogs.")
+        signal = detect_high_entropy_blob(
+            "This is a completely normal sentence about cats and dogs."
+        )
         assert signal is None
 
     def test_ignores_short_tokens(self):

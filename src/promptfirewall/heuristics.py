@@ -49,7 +49,8 @@ def detect_high_entropy_blob(text: str) -> HeuristicSignal | None:
             return HeuristicSignal(
                 "high_entropy_blob",
                 20,
-                f"Found a {len(blob)}-char high-entropy token (entropy={entropy:.2f}) — possible encoded payload.",
+                f"Found a {len(blob)}-char high-entropy token (entropy={entropy:.2f})"
+                " — possible encoded payload.",
             )
     return None
 
@@ -80,7 +81,8 @@ def detect_control_characters(text: str) -> HeuristicSignal | None:
         return HeuristicSignal(
             "hidden_characters",
             25,
-            f"Found {zero_width_hits} zero-width and {control_hits} control characters — likely used to hide text from a human reviewer.",
+            f"Found {zero_width_hits} zero-width and {control_hits} control characters"
+            " — likely used to hide text from a human reviewer.",
         )
     return None
 
@@ -93,7 +95,8 @@ def detect_excessive_delimiters(text: str) -> HeuristicSignal | None:
         return HeuristicSignal(
             "excessive_delimiters",
             10,
-            f"{delimiter_count} structural delimiters found — possible attempt to fake a new context boundary.",
+            f"{delimiter_count} structural delimiters found"
+            " — possible attempt to fake a new context boundary.",
         )
     return None
 
