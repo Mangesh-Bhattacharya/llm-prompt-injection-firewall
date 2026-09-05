@@ -195,7 +195,8 @@
     els.historyList.innerHTML = history
       .map(
         (item, i) => `
-      <div class="history-item" data-index="${i}">
+      <div class="history-item" data-index="${i}" role="button" tabindex="0"
+           aria-label="Reload: ${escapeHtml(truncate(item.text, 60))}, verdict ${item.verdict}, score ${item.score} of 100">
         <span class="h-badge ${item.verdict}">${item.verdict.toUpperCase()}</span>
         <span class="h-text">${escapeHtml(truncate(item.text, 90))}</span>
         <span class="h-score">${item.score}/100</span>
@@ -203,10 +204,17 @@
       )
       .join("");
     $$(".history-item", els.historyList).forEach((row) => {
-      row.addEventListener("click", () => {
+      const activate = () => {
         const item = history[Number(row.dataset.index)];
         els.input.value = item.text;
         runAnalysis();
+      };
+      row.addEventListener("click", activate);
+      row.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          activate();
+        }
       });
     });
   }
@@ -260,13 +268,32 @@
   }
 
   // ---------- tabs (integrate section) ----------
+  function activateTab(btn, { focus = false } = {}) {
+    const tabs = $$(".tab-btn");
+    tabs.forEach((b) => {
+      const selected = b === btn;
+      b.classList.toggle("active", selected);
+      b.setAttribute("aria-selected", String(selected));
+      b.tabIndex = selected ? 0 : -1;
+    });
+    $$(".tab-panel").forEach((p) => {
+      const selected = p.dataset.tab === btn.dataset.tab;
+      p.classList.toggle("active", selected);
+      p.hidden = !selected;
+    });
+    if (focus) btn.focus();
+  }
+
   function initTabs() {
-    $$(".tab-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        $$(".tab-btn").forEach((b) => b.classList.remove("active"));
-        $$(".tab-panel").forEach((p) => p.classList.remove("active"));
-        btn.classList.add("active");
-        $(`.tab-panel[data-tab="${btn.dataset.tab}"]`).classList.add("active");
+    const tabs = $$(".tab-btn");
+    tabs.forEach((btn, i) => {
+      btn.addEventListener("click", () => activateTab(btn));
+      btn.addEventListener("keydown", (e) => {
+        const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (dir === 0) return;
+        e.preventDefault();
+        const next = tabs[(i + dir + tabs.length) % tabs.length];
+        activateTab(next, { focus: true });
       });
     });
   }
