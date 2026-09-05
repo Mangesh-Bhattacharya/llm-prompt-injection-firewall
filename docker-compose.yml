@@ -1,0 +1,16 @@
+services:
+  promptfirewall:
+    build: .
+    image: prompt-firewall:latest
+    container_name: prompt-firewall
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    # Runs fully offline once the image is built: no external API calls,
+    # no embedding model download, no network access required at runtime.
