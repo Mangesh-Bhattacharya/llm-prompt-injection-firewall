@@ -92,6 +92,22 @@ TF-IDF similarity is deliberately lightweight — no embedding model, no network
 
 It talks to the same `/analyze` and `/health` endpoints documented under [HTTP API](#http-api) — no separate backend or build step, and no external network calls (fonts, scripts, and styles are all bundled).
 
+The UI is accessible by default: a skip link to the playground, a full ARIA tabs pattern (with arrow-key navigation) on the integration snippets, keyboard-operable session history, `aria-live` verdict announcements, visible focus states, and `prefers-reduced-motion` support. Colors are checked against WCAG 2.1 AA contrast.
+
+### Error handling
+
+Errors surface in place, in plain language — no silent failures, no raw stack traces.
+
+Oversized input is rejected with a `413` before it reaches the detector, and the UI reports exactly why:
+
+![Error banner showing a 413 response after submitting text over the 20,000-character limit](docs/error-413.png)
+
+If the backend isn't reachable, the status indicator in the header flips to `API unreachable` instead of leaving you guessing why Analyze isn't doing anything:
+
+![Header status dot turning red with an "API unreachable" label when the backend is down](docs/error-offline.png)
+
+Every other input error (empty text, malformed JSON) returns a `422` with a `detail` message — see [HTTP API](#http-api).
+
 ## Install
 
 ```bash
