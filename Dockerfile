@@ -19,9 +19,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install dependencies first so this layer is cached across code-only changes.
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Install from the pinned lock file (exact, hash-free pins resolved from
+# requirements.txt via `pip-compile`) rather than requirements.txt's ranges,
+# so every build gets byte-identical dependency versions instead of
+# "whatever resolves today." Regenerate after changing requirements.txt:
+#   pip install pip-tools
+#   pip-compile requirements.txt --output-file=requirements.lock.txt --allow-unsafe --strip-extras
+COPY requirements.txt requirements.lock.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt
 
 # Application code, library, CLI, and the static web UI.
 COPY src/ ./src/
