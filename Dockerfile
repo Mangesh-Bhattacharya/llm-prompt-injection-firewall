@@ -31,6 +31,7 @@ RUN pip install --no-cache-dir -r requirements.lock.txt
 # Application code, library, CLI, and the static web UI.
 COPY src/ ./src/
 COPY webui/ ./webui/
+COPY policies/ ./policies/
 COPY cli.py ./cli.py
 
 # Run as a non-root user (least privilege — this container never needs root).

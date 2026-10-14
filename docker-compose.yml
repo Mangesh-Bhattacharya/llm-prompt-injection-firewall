@@ -6,6 +6,9 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
+    environment:
+      # Demo policy; mount your own and point this at it. Unset = deny all tool calls.
+      TOOLGUARD_POLICY_FILE: /app/policies/banking.example.json
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
       interval: 10s

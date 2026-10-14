@@ -15,6 +15,7 @@ Or open http://localhost:8000/ for the interactive playground.
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -25,6 +26,7 @@ from pydantic import BaseModel, Field
 from . import __version__
 from .detector import BLOCK_THRESHOLD, FLAG_THRESHOLD, PromptFirewall
 from .patterns import CATEGORY_DESCRIPTIONS, PATTERNS
+from .toolguard import PolicyError, ToolCall, ToolGuard
 
 logger = logging.getLogger("promptfirewall.api")
 
@@ -54,6 +56,24 @@ app.add_middleware(
 _firewall = PromptFirewall()
 
 
+def _load_toolguard() -> ToolGuard:
+    """Load the tool policy named by TOOLGUARD_POLICY_FILE. With none configured
+    the guard has no tools, so every call is denied (secure default). A
+    malformed policy aborts startup rather than silently running unguarded."""
+    path = os.environ.get("TOOLGUARD_POLICY_FILE")
+    if not path:
+        logger.warning("TOOLGUARD_POLICY_FILE not set; /guard/tool-call will deny all tools")
+        return ToolGuard([], firewall=_firewall)
+    return ToolGuard.from_file(path, firewall=_firewall)
+
+
+try:
+    _toolguard = _load_toolguard()
+except PolicyError:  # pragma: no cover - fail closed at startup
+    logger.exception("invalid tool policy")
+    raise
+
+
 class AnalyzeRequest(BaseModel):
     text: str = Field(..., min_length=1, description="Text to analyze (user input or LLM output).")
 
@@ -80,6 +100,41 @@ def analyze(request: AnalyzeRequest) -> dict:
         logger.exception("analyze() failed")
         raise HTTPException(status_code=500, detail="internal error analyzing text") from None
     return result.to_dict()
+
+
+class GuardRequest(BaseModel):
+    tool: str = Field(..., min_length=1, max_length=128)
+    arguments: dict = Field(default_factory=dict)
+    untrusted_context: list[str] = Field(
+        default_factory=list,
+        description="Text that influenced the model this turn: user messages, "
+        "retrieved documents, tool outputs.",
+    )
+
+
+class GuardResponse(BaseModel):
+    action: str
+    tool: str
+    risk: str | None
+    reasons: list[str]
+    context_verdict: str
+    argument_verdict: str
+
+
+@app.post("/guard/tool-call", response_model=GuardResponse)
+def guard_tool_call(request: GuardRequest) -> dict:
+    """Authorize a tool call the model proposes: allow, require approval, or deny."""
+    total = sum(len(t) for t in request.untrusted_context)
+    if total > MAX_TEXT_LENGTH * 5:
+        raise HTTPException(status_code=413, detail="untrusted_context too large")
+    try:
+        decision = _toolguard.evaluate(
+            ToolCall(request.tool, request.arguments), request.untrusted_context
+        )
+    except Exception:  # pragma: no cover - fail closed
+        logger.exception("guard_tool_call() failed")
+        raise HTTPException(status_code=500, detail="internal error evaluating tool call") from None
+    return decision.to_dict()
 
 
 @app.get("/health")
