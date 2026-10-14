@@ -79,6 +79,10 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"text": "What is the capital of France?"}' \
             | grep -q '"verdict":"allow"'
+          curl -sf -X POST http://localhost:8000/guard/tool-call \
+            -H "Content-Type: application/json" \
+            -d '{"tool": "drop_database", "arguments": {}}' \
+            | grep -q '"action":"deny"'
           curl -sf -o /dev/null -w '%{http_code}' http://localhost:8000/ | grep -q '^200$'
           curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8000/analyze \
             -H "Content-Type: application/json" -d '{"text": ""}' | grep -q '^422$'

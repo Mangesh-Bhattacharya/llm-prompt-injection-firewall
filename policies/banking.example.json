@@ -1,0 +1,29 @@
+{
+  "tools": {
+    "get_balance": {
+      "risk": "read",
+      "args": {"account_id": {"type": "string", "pattern": "acct_[0-9]{4,10}"}}
+    },
+    "send_secure_message": {
+      "risk": "write",
+      "args": {
+        "account_id": {"type": "string", "pattern": "acct_[0-9]{4,10}"},
+        "body": {"type": "string", "max_length": 2000, "scan": true}
+      }
+    },
+    "wire_transfer": {
+      "risk": "write",
+      "args": {
+        "from_account": {"type": "string", "pattern": "acct_[0-9]{4,10}"},
+        "to_account": {"type": "string", "pattern": "[0-9]{6,17}"},
+        "amount": {"type": "number", "min": 0.01, "max": 25000},
+        "memo": {"type": "string", "required": false, "max_length": 140, "scan": true}
+      },
+      "approval_thresholds": [{"arg": "amount", "above": 1000}]
+    },
+    "close_account": {
+      "risk": "destructive",
+      "args": {"account_id": {"type": "string", "pattern": "acct_[0-9]{4,10}"}}
+    }
+  }
+}
