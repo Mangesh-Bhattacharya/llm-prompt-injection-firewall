@@ -199,12 +199,17 @@ Beyond the generic [`middleware_example.py`](examples/middleware_example.py), tw
 | [`examples/telecom_network_ops_example.py`](examples/telecom_network_ops_example.py) | An LLM NOC copilot triaging trouble tickets that can call tools against live infrastructure (router config, ACLs). Demonstrates *indirect* injection via a poisoned ticket description, not a live chat message. | `delimiter_escape`, `instruction_override` |
 | [`examples/fintech_transaction_assistant_example.py`](examples/fintech_transaction_assistant_example.py) | A banking assistant with standing access to a `wire_transfer` tool. Treats `FLAG` (not just `BLOCK`) as a reason to require step-up verification, since the cost of a false negative here is a wire transfer, not a bad chat reply. | `agent_hijack` (`tool_hijack`, `grant_permissions`), `instruction_override` |
 
-Run either directly:
+| [`examples/indirect_injection_rag_poc.py`](examples/indirect_injection_rag_poc.py) | A RAG agent reads a poisoned KB article. Compares no defense, scan-only, and scan + [`AgentGuard`](src/promptfirewall/guard.py) taint-based tool gating; shows a polite payload the scanner misses and strict provenance gating catches. | `agent_hijack`, indirect injection |
+
+Run any directly:
 
 ```bash
 python examples/telecom_network_ops_example.py
 python examples/fintech_transaction_assistant_example.py
+python examples/indirect_injection_rag_poc.py
 ```
+
+Write-ups: [`docs/articles/`](docs/articles/).
 
 ## Evaluation
 
