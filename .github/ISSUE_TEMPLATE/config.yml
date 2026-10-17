@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a detection bypass or vulnerability
+    url: https://github.com/Mangesh-Bhattacharya/llm-prompt-injection-firewall/security/advisories/new
+    about: Private reporting only — do not post bypass inputs publicly.
