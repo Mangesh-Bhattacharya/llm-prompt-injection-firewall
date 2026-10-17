@@ -1,0 +1,15 @@
+name: False positive
+description: Benign text that scores FLAG or BLOCK
+labels: [false-positive]
+body:
+  - type: textarea
+    id: text
+    attributes: {label: Input text, description: Benign text that was flagged (no secrets/PII)}
+    validations: {required: true}
+  - type: input
+    id: result
+    attributes: {label: Verdict and score, placeholder: "FLAG / 31"}
+    validations: {required: true}
+  - type: textarea
+    id: signals
+    attributes: {label: Signals fired, description: Paste the JSON from `python cli.py --json "..."`, render: json}

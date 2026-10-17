@@ -28,6 +28,7 @@ Ships with an interactive **web playground** (screenshot below) and a **one-comm
 - [Testing](#testing)
 - [Limitations](#limitations-read-before-relying-on-this-in-production)
 - [Roadmap](#roadmap)
+- [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
 
@@ -248,6 +249,10 @@ pytest tests/ -v
 - [ ] Per-tenant/per-app custom pattern packs
 - [ ] Structured logging sink (JSON lines) for SIEM ingestion
 - [ ] Benchmark against a public prompt-injection dataset, not just the hand-curated held-out set in `notebooks/`
+
+## Contributing
+
+PRs, false-positive reports, and new patterns are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Good places to start: the Roadmap items above and issues labelled `good first issue`. Launch and community assets live in [`docs/launch/`](docs/launch/).
 
 ## Security
 
